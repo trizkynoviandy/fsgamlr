@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 
 from sklearn.linear_model import LinearRegression
@@ -23,7 +25,10 @@ class GeneticAlgorithm:
         
     def generate_population(self):
         """
-        Generate initial population
+        Generate a population of random candidate solutions.
+        
+        :param self: This is the object that is being called
+        :return: The population.
         """
         for n in range(self.population_size):
             n_features = np.random.randint(1, self.max_features + 1)
@@ -32,9 +37,12 @@ class GeneticAlgorithm:
             self.population.append(genes)
         return self.population
     
-    def calculate_fitness(self):
+    def _calculate_fitness(self):
         """
-        Calculate fitness of each chromosome
+        Calculate the fitness of each chromosome in the population.
+        
+        :param self: This is the object that is being called
+        :return: The fitness of each chromosome.
         """
         self.temp_fitness = []
         for generation in range(self.n_generation):
@@ -63,3 +71,35 @@ class GeneticAlgorithm:
             count +=1
 
         return self.temp_fitness
+    
+    def _selection(self):
+        """
+        Select a random number between 0 and the sum of the fitness values of the population. 
+        Then, iterate through the population and add the fitness value of each individual to a roulette
+        wheel. If the random number is between the current value of the roulette wheel and the previous 
+        value of the roulette wheel, then the parent is the individual at the current index.
+        
+        :param self: refers to the object that is calling the method
+        :return: The parent.
+        """
+        temp_parent = []
+        temp_roulette = []
+        roulette_wheels = sum(self.temp_fitness)
+
+        for item in range(self.population_size):
+            if item == 0:
+                temp_roulette.append(self.temp_fitness[0])
+            else:
+                temp_roulette.append(temp_roulette[item - 1] + self.temp_fitness[item])
+
+        selection = random.uniform(0, float(roulette_wheels))
+
+        for counter in range(self.population_size -1):
+            if selection <= temp_roulette[0]:
+                temp_parent = self.population[0]
+                break
+            elif selection >= temp_roulette[counter] and selection <= temp_roulette[counter + 1]:
+                temp_parent = self.population[counter]
+                break
+
+        return temp_parent
