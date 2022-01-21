@@ -103,3 +103,47 @@ class GeneticAlgorithm:
                 break
 
         return temp_parent
+    
+    def _crossover(self):
+        parent_1 = self._selection()
+        parent_2 = self._selection()  
+        self.offsprings = []
+
+        crossover_point = int(self.n_genes / 2)
+
+        parent_1a = parent_1[0:crossover_point]
+        parent_2a = parent_2[crossover_point:]
+        parent_1b = parent_2[0:crossover_point]
+        parent_2b = parent_1[crossover_point:]
+
+        temp_offspring_1 = parent_1a + parent_2a
+        temp_offspring_2 = parent_1b + parent_2b
+        self.offsprings.append(temp_offspring_1)
+        self.offsprings.append(temp_offspring_2)
+
+        offspring_selected_features = []
+
+        for offspring in self.offsprings:
+            temp_selected = []
+            for genes in range(self.n_genes):
+                if offspring[genes] == 1:
+                    temp_selected_offspring = self.X.columns.values[genes]
+                    temp_selected.append(temp_selected_offspring)
+            offspring_selected_features.append(temp_selected)
+        
+        self.fitness_offsprings = []
+
+        for features in offspring_selected_features:
+            features_offspring = self.X[features]
+            target_offspring = self.Y
+            if len(features_offspring.columns) == 0:
+                self.fitness_offsprings.append(np.float64(1000))
+            elif len(features_offspring.columns) > self.max_features:
+                self.fitness_offsprings.append(np.float64(1000))
+            else:
+                regressor = LinearRegression().fit(features_offspring, target_offspring)
+                y_pred = regressor.predict(features_offspring)
+                fitness = mean_squared_error(target_offspring, y_pred, squared=False)
+                self.fitness_offsprings.append(fitness)
+
+        return self.fitness_offsprings
