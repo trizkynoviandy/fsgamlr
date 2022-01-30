@@ -105,6 +105,11 @@ class GeneticAlgorithm:
         return temp_parent
     
     def _crossover(self):
+        """
+        The function is responsible for selecting two parents from the population, and then generating
+        two offsprings by performing crossover on the selected parents.
+        :return: The fitness of the offsprings.
+        """
         parent_1 = self._selection()
         parent_2 = self._selection()  
         self.offsprings = []
@@ -147,3 +152,25 @@ class GeneticAlgorithm:
                 self.fitness_offsprings.append(fitness)
 
         return self.fitness_offsprings
+    
+    def _mutation(self):
+        """
+        - The function is used to mutate the offspring.
+            - The function is called when the mutation chance is 5.
+            - The function is used to mutate the offspring.
+            - The function is called when the mutation chance is 5.
+        """
+        mutation_chance = random.randint(1, 100)
+        if mutation_chance == 5:
+            print('terjadi Mutasi')
+            mutated_gen = random.randint(0, self.n_genes)
+            if self.offsprings[0][mutated_gen] == 1:
+                self.offsprings[0][mutated_gen] == 0
+            else:
+                self.offsprings[0][mutated_gen] == 1
+            if self.offsprings[1][mutated_gen] == 1:
+                self.offsprings[1][mutated_gen] == 0
+            else:
+                self.offsprings[1][mutated_gen] == 1
+        else:
+            pass
