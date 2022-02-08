@@ -174,3 +174,27 @@ class GeneticAlgorithm:
                 self.offsprings[1][mutated_gen] == 1
         else:
             pass
+        
+    def _elitism(self):
+        """
+        The function takes in the fitness of the offsprings and compares it to the current population. If
+        the fitness of the offspring is less than the current population, then the offspring replaces the
+        current population
+        :return: The population after the generation of offsprings and elitism.
+        """
+        counter = 0
+        for fitness_offspring in self.fitness_offsprings:
+            current_highest_fitness = [max(self.temp_fitness)]
+            temp_index = self.temp_fitness.index(max(self.temp_fitness))
+            if fitness_offspring < current_highest_fitness:
+                self.population[temp_index] = self.offsprings[counter]
+                self.temp_fitness[temp_index] = self.fitness_offsprings[counter]
+            else:
+                pass
+            counter +=1
+        avg = sum(self.temp_fitness) / len(self.population)
+        self.average_fitness.append(avg)
+        best_individual = min(self.temp_fitness)
+        self.best_fitness.append(best_individual)
+
+        return self.population
