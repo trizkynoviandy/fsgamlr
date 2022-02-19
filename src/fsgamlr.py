@@ -198,3 +198,25 @@ class GeneticAlgorithm:
         self.best_fitness.append(best_individual)
 
         return self.population
+    
+    def fit(self):
+        for generation in range(self.n_generation):
+            calc_fitness = self._calculate_fitness()
+            cross = self._crossover()
+            mutation = self._mutation()
+            elit = self._elitism()
+            print('Iteration', generation+1)
+            print(' Offspring 1 : {:.3f}'.format(self.fitness_offsprings[0]), '| Offspring 2 : {:.3f}'.format(self.fitness_offsprings[1]))
+            print(' Current Best {:.3f} | Average {:.3f}'.format(self.best_fitness[generation], self.average_fitness[generation]))
+        self.check_selected = []
+        index = self.temp_fitness.index(min(self.temp_fitness))
+        check_count = 0
+        for item in self.population[index]:
+            if item == 1:
+                self.check_selected.append(self.X.columns.values[check_count])
+            check_count += 1
+
+        print('\nThe genetic algorithm has been run for {} iterations'.format(self.n_generation))
+        print('The best chromosome : {} | RMSE: {}'.format(index, min(self.temp_fitness)))
+        print('Average Population Fitness : ', self.average_fitness[-1])
+        print('\nSelected variables : ', self.check_selected)
