@@ -1,5 +1,6 @@
 import random
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from sklearn.linear_model import LinearRegression
@@ -220,3 +221,12 @@ class GeneticAlgorithm:
         print('The best chromosome : {} | RMSE: {}'.format(index, min(self.temp_fitness)))
         print('Average Population Fitness : ', self.average_fitness[-1])
         print('\nSelected variables : ', self.check_selected)
+        
+    def plot_result(self):
+        plt.title('RMSE in Each Generation')
+        plt.plot(self.best_fitness, label='Best Fitness')
+        plt.plot(self.average_fitness, label='Average Fitness')
+        plt.legend()
+        plt.xlabel('Generation')
+        plt.ylabel('RMSE')
+        plt.show()
