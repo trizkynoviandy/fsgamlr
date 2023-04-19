@@ -25,13 +25,12 @@ class GeneticAlgorithm:
         self.best_fitness = []
         
         if type(self.X) == np.ndarray:
-            print("haha")
             self.X = pd.DataFrame(self.X)
         else:
-            print("hehe")
+            pass
 
         
-    def generate_population(self):
+    def _generate_population(self):
         """
         Generate a population of random candidate solutions.
         
@@ -208,7 +207,8 @@ class GeneticAlgorithm:
 
         return self.population
     
-    def fit(self, verbose):
+    def optimize(self, verbose):
+        self._generate_population()
         for generation in range(self.n_generation):
             calc_fitness = self._calculate_fitness()
             cross = self._crossover()
