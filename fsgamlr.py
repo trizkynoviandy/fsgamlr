@@ -1,17 +1,13 @@
 import random
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
-
 class GeneticAlgorithm:
-
     def __init__(self, X, Y, max_features, population_size, n_generation):
-        self.X = X
+        self.X = pd.DataFrame(X)
         self.Y = Y
         self.max_features = max_features
         self.population_size = population_size
@@ -23,12 +19,6 @@ class GeneticAlgorithm:
         self.fitness_offspring = []
         self.average_fitness = []
         self.best_fitness = []
-        
-        if type(self.X) == np.ndarray:
-            self.X = pd.DataFrame(self.X)
-        else:
-            pass
-
         
     def _generate_population(self):
         """
@@ -51,33 +41,25 @@ class GeneticAlgorithm:
         :param self: This is the object that is being called
         :return: The fitness of each chromosome.
         """
-            
         self.temp_fitness = []
-        for generation in range(self.n_generation):
-            selected_features = [[] for _ in range(self.population_size)]
-
-            for chromosome in range(self.population_size):
-                for gene in range(self.n_genes):
-                    if self.population[chromosome][gene] == 1:
-                        temp_selected = self.X.columns.values[gene]
-                        selected_features[chromosome].append(temp_selected)
-
-        count = 0
+        selected_features = [[] for _ in range(self.population_size)]
+        for chromosome in range(self.population_size):
+            for gene in range(self.n_genes):
+                if self.population[chromosome][gene] == 1:
+                    temp_selected = self.X.columns.values[gene]
+                    selected_features[chromosome].append(temp_selected)
+                    
         for selected in selected_features:
             features = self.X[selected]
             target = self.Y
-
-            if len(selected_features[count]) == 0:
-                self.temp_fitness.append(fitness**2)
-            elif len(selected_features[count]) > self.max_features:
-                self.temp_fitness.append(fitness**2)
+            if len(selected) == 0 or len(selected) > self.max_features:
+                fitness = np.float64(1000)
             else:
-                regressor = LinearRegression().fit(features,target)
+                regressor = LinearRegression().fit(features, target)
                 y_pred = regressor.predict(features)
                 fitness = mean_squared_error(target, y_pred, squared=False)
-                self.temp_fitness.append(fitness)
-            count +=1
-
+            self.temp_fitness.append(fitness)
+        
         return self.temp_fitness
     
     def _selection(self):
@@ -93,7 +75,6 @@ class GeneticAlgorithm:
         temp_parent = []
         temp_roulette = []
         roulette_wheels = sum(self.temp_fitness)
-
         for item in range(self.population_size):
             if item == 0:
                 temp_roulette.append(self.temp_fitness[0])
@@ -149,15 +130,13 @@ class GeneticAlgorithm:
         for features in offspring_selected_features:
             features_offspring = self.X[features]
             target_offspring = self.Y
-            if len(features_offspring.columns) == 0:
-                self.fitness_offsprings.append(np.float64(1000))
-            elif len(features_offspring.columns) > self.max_features:
-                self.fitness_offsprings.append(np.float64(1000))
+            if len(features_offspring.columns) == 0 or len(features_offspring.columns) > self.max_features:
+                fitness = np.float64(1000)
             else:
                 regressor = LinearRegression().fit(features_offspring, target_offspring)
                 y_pred = regressor.predict(features_offspring)
                 fitness = mean_squared_error(target_offspring, y_pred, squared=False)
-                self.fitness_offsprings.append(fitness)
+            self.fitness_offsprings.append(fitness)
 
         return self.fitness_offsprings
     
@@ -169,19 +148,16 @@ class GeneticAlgorithm:
             - The function is called when the mutation chance is 5.
         """
         mutation_chance = random.randint(1, 100)
-        if mutation_chance == 5:
-            print('terjadi Mutasi')
-            mutated_gen = random.randint(0, self.n_genes)
+        if mutation_chance < 99:
+            mutated_gen = random.randint(0, self.n_genes - 1)
             if self.offsprings[0][mutated_gen] == 1:
-                self.offsprings[0][mutated_gen] == 0
+                self.offsprings[0][mutated_gen] = 0
             else:
-                self.offsprings[0][mutated_gen] == 1
+                self.offsprings[0][mutated_gen] = 1
             if self.offsprings[1][mutated_gen] == 1:
-                self.offsprings[1][mutated_gen] == 0
+                self.offsprings[1][mutated_gen] = 0
             else:
-                self.offsprings[1][mutated_gen] == 1
-        else:
-            pass
+                self.offsprings[1][mutated_gen] = 1
         
     def _elitism(self):
         """
@@ -192,14 +168,12 @@ class GeneticAlgorithm:
         """
         counter = 0
         for fitness_offspring in self.fitness_offsprings:
-            current_highest_fitness = [max(self.temp_fitness)]
-            temp_index = self.temp_fitness.index(max(self.temp_fitness))
+            current_highest_fitness = max(self.temp_fitness)
+            temp_index = self.temp_fitness.index(current_highest_fitness)
             if fitness_offspring < current_highest_fitness:
                 self.population[temp_index] = self.offsprings[counter]
                 self.temp_fitness[temp_index] = self.fitness_offsprings[counter]
-            else:
-                pass
-            counter +=1
+            counter += 1
         avg = sum(self.temp_fitness) / len(self.population)
         self.average_fitness.append(avg)
         best_individual = min(self.temp_fitness)
@@ -216,11 +190,11 @@ class GeneticAlgorithm:
             elit = self._elitism()
             
             if verbose == 1:
-                print('Iteration', generation+1)
-                print(' Offspring 1 : {:.3f}'.format(self.fitness_offsprings[0]), '| Offspring 2 : {:.3f}'.format(self.fitness_offsprings[1]))
-                print(' Current Best {:.3f} | Average {:.3f}'.format(self.best_fitness[generation], self.average_fitness[generation]))
-            else:
-                pass
+                print(f"Iteration {generation + 1} | Current Best: {self.best_fitness[generation]:.3f} | Average: {self.average_fitness[generation]:.3f}")
+            elif verbose == 2:
+                print(f"Iteration {generation + 1} | Current Best: {self.best_fitness[generation]:.3f} | Average: {self.average_fitness[generation]:.3f}")
+                print('Offspring 1: {:.3f}'.format(self.fitness_offsprings[0]), '| Offspring 2: {:.3f}'.format(self.fitness_offsprings[1]))
+        
         self.check_selected = []
         index = self.temp_fitness.index(min(self.temp_fitness))
         check_count = 0
@@ -230,9 +204,9 @@ class GeneticAlgorithm:
             check_count += 1
 
         print('\nThe genetic algorithm has been run for {} iterations'.format(self.n_generation))
-        print('The best chromosome : {} | RMSE: {}'.format(index, min(self.temp_fitness)))
-        print('Average Population Fitness : ', self.average_fitness[-1])
-        print('\nSelected variables : ', self.check_selected)
+        print('The best chromosome: {} | RMSE: {}'.format(index, min(self.temp_fitness)))
+        print('Average Population Fitness:', self.average_fitness[-1])
+        print('\nSelected variables:', self.check_selected)
         
     def plot_result(self):
         plt.title('RMSE in Each Generation')
